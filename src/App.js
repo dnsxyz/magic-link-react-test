@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { TezosToolkit } from "@taquito/taquito";
 
 import { Magic } from "magic-sdk";
-import { OAuthExtension, OAuthProvider } from "@magic-ext/oauth";
+import { OAuthExtension } from "@magic-ext/oauth";
 
 import { TaquitoExtension } from "@magic-ext/taquito";
 
@@ -195,10 +195,7 @@ const getBalance = {
       try {
         const pkString = await magicNear.near.getPublicKey();
         const pk = near.utils.key_pair.PublicKey.fromString(pkString);
-        const account = await nearConnection.createAccount(
-          `${address}.near`,
-          pk
-        );
+        await nearConnection.createAccount(`${address}.near`, pk);
       } catch (e) {
         console.log("near error 2", e);
       }
@@ -465,7 +462,6 @@ const LOGIN_PROVIDER = [
 let ran = false;
 
 function App() {
-  const [userInfo, setUserInfo] = useState();
   const [signer, setSigner] = useState();
   const [wallet, setWallet] = useState();
   const [balance, setBalance] = useState();
@@ -485,7 +481,6 @@ function App() {
         try {
           // probably want to save in local storage or something persistant
           const userInfo = await magicAuth.oauth.getRedirectResult();
-          setUserInfo(userInfo);
           console.log("processed oauth for", userInfo.magic.userMetadata.email);
         } catch {}
       } else {
