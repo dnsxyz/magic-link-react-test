@@ -24,6 +24,8 @@ import nacl from "tweetnacl";
 import { decodeUTF8 } from "tweetnacl-util";
 import { MAGIC_PUBLIC_KEY } from "./config";
 
+import "./App.css";
+
 const MAGIC_API_KEY = MAGIC_PUBLIC_KEY;
 
 const BLOCKCHAIN = "tezos";
