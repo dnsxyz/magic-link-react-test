@@ -15,7 +15,6 @@ const magicAuth = new Magic(MAGIC_API_KEY, {
   extensions: [new OAuthExtension()],
 });
 
-
 const LOGIN_PROVIDER = [
   "google",
   "facebook",
@@ -30,7 +29,6 @@ const LOGIN_PROVIDER = [
   "microsoft",
 ];
 
-
 function App() {
   const [user, setUser] = useState(null);
 
@@ -39,48 +37,65 @@ function App() {
       provider: PROVIDER,
       redirectURI: window.location.href,
     });
-  }
+  };
   const handleLogout = async () => {
     await magicAuth.user.logout();
     setUser(null);
-  }
+  };
 
   useEffect(() => {
     let provider = new URLSearchParams(window.location.search).get("provider");
-    
-    if(provider){
+
+    if (provider) {
       console.log("provider in search params:", provider);
 
-      magicAuth.oauth.getRedirectResult().then((userInfo) => {
-        console.log("processed oauth for", userInfo.magic.userMetadata.email);
-        setUser(userInfo.magic.userMetadata);
-      }
-      ).catch((err)=>{
-        console.log("getRedirectResult error");
-        console.error(err);
-      });
-    }
+      magicAuth.oauth
+        .getRedirectResult()
+        .then((userInfo) => {
+          console.log("processed oauth for", userInfo.magic.userMetadata.email);
+          setUser(userInfo.magic.userMetadata);
 
-    magicAuth.user.isLoggedIn().then((isLoggedIn)=>{
-      console.log("logged in:", isLoggedIn);
+          magicAuth.user
+            .isLoggedIn()
+            .then((isLoggedIn) => {
+              console.log("after redirect logged in:", isLoggedIn);
 
-      if (isLoggedIn) {
-        // probably want to save in local storage or something persistant
-        magicAuth.user.getMetadata().then((userInfo)=>{
-          console.log("set user:", userInfo);
-  
-          setUser(userInfo);
+              if (isLoggedIn) {
+                // probably want to save in local storage or something persistant
+                magicAuth.user.getMetadata().then((userInfo) => {
+                  console.log("set user:", userInfo);
+
+                  setUser(userInfo);
+                });
+              } else {
+                setUser(null);
+              }
+            })
+            .catch();
+        })
+        .catch((err) => {
+          console.log("getRedirectResult error");
+          console.error(err);
         });
+    }
+    magicAuth.user
+      .isLoggedIn()
+      .then((isLoggedIn) => {
+        console.log("during redirect logged in:", isLoggedIn);
 
-      } else {
-        setUser(null);
-      }
-    }).catch();
-    
-    
+        if (isLoggedIn) {
+          // probably want to save in local storage or something persistant
+          magicAuth.user.getMetadata().then((userInfo) => {
+            console.log("set user:", userInfo);
+
+            setUser(userInfo);
+          });
+        } else {
+          setUser(null);
+        }
+      })
+      .catch();
   }, []);
-
-  
 
   return (
     <div className="App">
@@ -93,22 +108,18 @@ function App() {
       ) : !user ? (
         <>
           <div>Please login with {PROVIDER}</div>
-          <button
-            onClick={handleLoginWithRedirect}
-          >
-            Login
-          </button>
+          <button onClick={handleLoginWithRedirect}>Login</button>
         </>
       ) : (
         <div>
-          <div>You are signed in as <strong>{user.email}</strong></div>
-          <div>You wallet address is <strong>{user.publicAddress}</strong></div>
-          
-          <button
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+          <div>
+            You are signed in as <strong>{user.email}</strong>
+          </div>
+          <div>
+            You wallet address is <strong>{user.publicAddress}</strong>
+          </div>
+
+          <button onClick={handleLogout}>Logout</button>
         </div>
       )}
     </div>
